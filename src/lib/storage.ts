@@ -1,4 +1,4 @@
-import { put } from "@vercel/blob";
+import { put, del } from "@vercel/blob";
 import type { UploadKind } from "@/lib/storage-types";
 
 export type { UploadKind };
@@ -9,7 +9,10 @@ const ALLOWED_KINDS = new Set<UploadKind>([
   "gallery",
 ]);
 
-/** Dosyayı Vercel Blob veya (yalnızca lokal) diske yazar */
+/**
+ * Üretim: yalnızca Vercel Blob.
+ * Yerel disk kodu bu modülde yok (Turbopack/Vercel fs izlemesi olmasın).
+ */
 export async function saveUploadBuffer(options: {
   kind: UploadKind;
   filename: string;
@@ -22,30 +25,30 @@ export async function saveUploadBuffer(options: {
   }
 
   const token = process.env.BLOB_READ_WRITE_TOKEN?.trim();
-  if (token) {
-    const blob = await put(`uploads/${kind}/${filename}`, buffer, {
-      access: "public",
-      contentType,
-      addRandomSuffix: false,
-      token,
-    });
-    return blob.url;
-  }
-
-  if (process.env.VERCEL) {
+  if (!token) {
     throw new Error(
-      "Vercel'de BLOB_READ_WRITE_TOKEN tanımlı olmalıdır (Storage → Blob).",
+      "BLOB_READ_WRITE_TOKEN gerekli. Vercel Storage → Blob token ekleyin. Yerelde .env'e yazın.",
     );
   }
 
-  const mod = "storage-local";
-  const local = await import(`@/lib/${mod}`);
-  return local.saveUploadBufferLocal(options);
+  const blob = await put(`uploads/${kind}/${filename}`, buffer, {
+    access: "public",
+    contentType,
+    addRandomSuffix: false,
+    token,
+  });
+  return blob.url;
 }
 
 export async function deleteUpload(fileUrl?: string | null) {
-  const { deleteLocalUpload } = await import("@/lib/files");
-  await deleteLocalUpload(fileUrl);
+  if (!fileUrl) return;
+  if (!/^https?:\/\//i.test(fileUrl)) return;
+  if (!fileUrl.includes("blob.vercel-storage.com")) return;
+  try {
+    await del(fileUrl, { token: process.env.BLOB_READ_WRITE_TOKEN });
+  } catch {
+    // ignore
+  }
 }
 
 export function resolveLocalUploadPath(_fileUrl: string): string | null {

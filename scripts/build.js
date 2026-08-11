@@ -1,17 +1,33 @@
 /**
  * Vercel build girişi.
- * NEXT_ADAPTER_PATH unset edilmezse Next 16 + Vercel onBuildComplete
- * next-server.js.nft.json ENOENT ile çöker (#96646).
+ * NEXT_ADAPTER_PATH, Next 16'da onBuildComplete sırasında
+ * next-server.js.nft.json ENOENT üretir (#96646).
  */
 const { spawnSync } = require("child_process");
 const path = require("path");
 const fs = require("fs");
 
-function run(command, args) {
+function cleanEnv() {
+  const env = { ...process.env };
+  delete env.NEXT_ADAPTER_PATH;
+  delete env.NEXT_ENABLE_ADAPTER;
+  // Boş string de Rust tarafında "adapter var" sayılabiliyor
+  env.NEXT_ADAPTER_PATH = undefined;
+  return Object.fromEntries(
+    Object.entries(env).filter(
+      ([key, value]) =>
+        value !== undefined &&
+        key !== "NEXT_ADAPTER_PATH" &&
+        key !== "NEXT_ENABLE_ADAPTER",
+    ),
+  );
+}
+
+function run(command, args, env) {
   console.log(`> ${command} ${args.join(" ")}`);
   const result = spawnSync(command, args, {
     stdio: "inherit",
-    env: process.env,
+    env,
     shell: true,
     cwd: process.cwd(),
   });
@@ -20,23 +36,20 @@ function run(command, args) {
   }
 }
 
-// Vercel builder'ın enjekte ettiği adapter'ı kapat
-delete process.env.NEXT_ADAPTER_PATH;
-delete process.env.NEXT_ENABLE_ADAPTER;
+const env = cleanEnv();
+console.log("build: NEXT_ADAPTER_PATH unset =", !("NEXT_ADAPTER_PATH" in env));
+console.log(
+  "build: next =",
+  require(path.join(process.cwd(), "node_modules/next/package.json")).version,
+);
 
-console.log("build: NEXT_ADAPTER_PATH unset");
-console.log("build: next =", require(path.join(process.cwd(), "node_modules/next/package.json")).version);
+run("npx", ["prisma", "generate"], env);
+run("npx", ["next", "build", "--webpack"], env);
 
-run("npx", ["prisma", "generate"]);
-run("npx", ["next", "build", "--webpack"]);
-
-// Yedek: adapter yine de dosyayı isterse
 require(path.join(__dirname, "ensure-nft.js"));
 
-// Son kontrol
 const nft = path.join(process.cwd(), ".next", "next-server.js.nft.json");
 if (!fs.existsSync(nft)) {
-  fs.mkdirSync(path.dirname(nft), { recursive: true });
   fs.writeFileSync(nft, JSON.stringify({ version: 1, files: [] }));
   console.log("build: emergency next-server.js.nft.json written");
 }
