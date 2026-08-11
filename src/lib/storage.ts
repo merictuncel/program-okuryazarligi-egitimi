@@ -17,9 +17,15 @@ function useBlobStorage() {
 function localUploadRoot() {
   const dataDir = process.env.DATA_DIR?.trim();
   if (dataDir) {
-    return path.join(dataDir, "uploads");
+    // VPS/kalıcı disk; Turbopack tüm cwd'yi paketlemesin
+    return path.join(/* turbopackIgnore: true */ dataDir, "uploads");
   }
-  return path.join(process.cwd(), "public", "uploads");
+  // Yerel geliştirme: yalnızca public/uploads
+  return path.join(
+    /* turbopackIgnore: true */ process.cwd(),
+    "public",
+    "uploads",
+  );
 }
 
 function localPublicUrl(kind: UploadKind, filename: string) {
@@ -51,8 +57,8 @@ export async function saveUploadBuffer(options: {
   }
 
   const dir = path.join(localUploadRoot(), kind);
-  await mkdir(dir, { recursive: true });
-  await writeFile(path.join(dir, filename), buffer);
+  await mkdir(/* turbopackIgnore: true */ dir, { recursive: true });
+  await writeFile(/* turbopackIgnore: true */ path.join(dir, filename), buffer);
   return localPublicUrl(kind, filename);
 }
 
@@ -85,7 +91,7 @@ export async function deleteUpload(fileUrl?: string | null) {
 
   const full = path.join(localUploadRoot(), subdir, filename);
   try {
-    await unlink(full);
+    await unlink(/* turbopackIgnore: true */ full);
   } catch {
     // ignore
   }
@@ -109,7 +115,7 @@ export async function readLocalUpload(
   const full = resolveLocalUploadPath(fileUrl);
   if (!full) return null;
   try {
-    const buffer = await readFile(full);
+    const buffer = await readFile(/* turbopackIgnore: true */ full);
     const ext = path.extname(full).toLowerCase();
     const mime: Record<string, string> = {
       ".jpg": "image/jpeg",

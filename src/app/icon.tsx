@@ -7,7 +7,11 @@ export const contentType = "image/png";
 
 export default async function Icon() {
   const logo = await readFile(
-    path.join(process.cwd(), "public", "projelogo.png"),
+    path.join(
+      /* turbopackIgnore: true */ process.cwd(),
+      "public",
+      "projelogo.png",
+    ),
   );
   const src = `data:image/png;base64,${logo.toString("base64")}`;
 

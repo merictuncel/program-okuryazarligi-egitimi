@@ -28,10 +28,18 @@ async function main() {
   for (const name of entries) {
     const sqlPath = path.join(migrationsDir, name, "migration.sql");
     const sql = await readFile(sqlPath, "utf8");
+    // Prisma SQL satır başı "-- CreateTable" yorumlarını at; tüm ifadeyi silme.
     const statements = sql
       .split(";")
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0 && !s.startsWith("--"));
+      .map((chunk) =>
+        chunk
+          .split("\n")
+          .map((line) => line.trim())
+          .filter((line) => line.length > 0 && !line.startsWith("--"))
+          .join("\n")
+          .trim(),
+      )
+      .filter((s) => s.length > 0);
 
     console.log(`→ ${name} (${statements.length} ifade)`);
     for (const statement of statements) {
