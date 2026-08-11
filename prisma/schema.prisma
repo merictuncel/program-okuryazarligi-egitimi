@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// Admin girişi — şifre bcrypt ile hash'lenmiş saklanır
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Site genel ayarları (tek kayıt olarak kullanılır)
+model SiteSettings {
+  id                   String   @id @default(cuid())
+  title                String
+  purpose              String
+  scope                String
+  startDate            String?
+  endDate              String?
+  location             String?
+  organizingCommittee  String?
+  scientificCommittee  String?
+  applicationFormUrl   String?
+  contactName          String?
+  contactTitle         String?
+  contactRole          String?
+  contactEmail         String?
+  contactPhone         String?
+  contactInstitution   String?
+  contactNote          String?
+  /// Başvuru koşulları sayfası metni
+  applicationCriteria  String?
+  /// KVKK aydınlatma metni
+  kvkkText             String?
+  /// Ulaşım ve konaklama bilgisi
+  travelInfo           String?
+  /// Galeri / sertifika bilgilendirme metni
+  certificateInfo      String?
+  updatedAt            DateTime @updatedAt
+}
+
+model Instructor {
+  id        String   @id @default(cuid())
+  name      String
+  title     String
+  biography String
+  photoUrl  String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Announcement {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  publishedAt DateTime @default(now())
+  isActive    Boolean  @default(true)
+  /// Site açılışında modal olarak göster
+  showAsPopup Boolean  @default(false)
+  /// Yalnızca güvenli dahili yollar (ör. /program)
+  linkPath    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+/// Etkinlik programı oturumları (gün, başlık, eğitmen, saat)
+model ProgramSession {
+  id             String   @id @default(cuid())
+  dayLabel       String
+  title          String
+  instructorName String?
+  timeLabel      String?
+  location       String?
+  description    String?
+  order          Int      @default(0)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+/// Sıkça sorulan sorular
+model FaqItem {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// İndirilebilir site belgeleri (PDF)
+model SiteDocument {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  fileUrl     String
+  fileName    String?
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+/// Galeri görselleri
+model GalleryImage {
+  id        String   @id @default(cuid())
+  title     String?
+  caption   String?
+  imageUrl  String
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

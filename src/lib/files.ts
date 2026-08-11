@@ -1,0 +1,6 @@
+import { deleteUpload } from "@/lib/storage";
+
+/** Geriye uyumlu alias — Blob veya yerel dosyayı siler */
+export async function deleteLocalUpload(fileUrl?: string | null) {
+  await deleteUpload(fileUrl);
+}

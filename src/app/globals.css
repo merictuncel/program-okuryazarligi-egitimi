@@ -1,0 +1,244 @@
+@import "tailwindcss";
+
+:root {
+  /* Akademik lacivert + gümüş */
+  --navy: #0a2540;
+  --navy-mid: #14365c;
+  --navy-deep: #061628;
+  --silver: #c5ced8;
+  --silver-soft: #e8edf2;
+  --silver-muted: #8b98a8;
+  --ink: #1a2b3c;
+  --muted: #5c6d7e;
+  --paper: #f4f7fa;
+  --surface: #ffffff;
+  --line: #d0d8e2;
+  --accent: #1a4a7a;
+  --accent-hover: #0f355c;
+  --focus: #3b6ea5;
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --shadow-soft: 0 4px 18px rgba(10, 37, 64, 0.06);
+  --shadow-hover: 0 10px 28px rgba(10, 37, 64, 0.1);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-navy: var(--navy);
+  --color-navy-mid: var(--navy-mid);
+  --color-navy-deep: var(--navy-deep);
+  --color-silver: var(--silver);
+  --color-silver-soft: var(--silver-soft);
+  --color-silver-muted: var(--silver-muted);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-focus: var(--focus);
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-source-serif);
+}
+
+body {
+  background:
+    linear-gradient(180deg, #eef2f6 0%, var(--paper) 28%, #f8fafc 100%);
+  color: var(--ink);
+  font-family: var(--font-inter), "Inter", system-ui, sans-serif;
+}
+
+.font-serif {
+  font-family: var(--font-source-serif), "Source Serif 4", Georgia,
+    "Times New Roman", serif;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -100px;
+  z-index: 10000;
+  border-radius: 0.75rem;
+  background: var(--navy);
+  color: #fff;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: top 120ms ease;
+}
+
+.skip-link:focus {
+  top: 1rem;
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* —— Ortak UI bileşenleri —— */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.btn-primary {
+  background: var(--navy);
+  color: #fff;
+  box-shadow: var(--shadow-soft);
+}
+
+.btn-primary:hover {
+  background: var(--navy-mid);
+  box-shadow: var(--shadow-hover);
+}
+
+.btn-secondary {
+  background: #fff;
+  color: var(--navy);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-soft);
+}
+
+.btn-secondary:hover {
+  border-color: var(--silver);
+  background: var(--silver-soft);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+.btn-light {
+  background: #fff;
+  color: var(--navy);
+  box-shadow: var(--shadow-soft);
+}
+
+.btn-light:hover {
+  background: var(--silver-soft);
+}
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.card:hover {
+  border-color: var(--silver);
+  box-shadow: var(--shadow-hover);
+}
+
+.card-static {
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.section-title {
+  margin-top: 0.5rem;
+  font-family: var(--font-source-serif), "Source Serif 4", Georgia, serif;
+  font-size: 1.875rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--navy);
+}
+
+.section-rule {
+  margin-top: 1rem;
+  height: 2px;
+  width: 5rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--navy), var(--silver));
+}
+
+.container-page {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 72rem;
+  padding-inline: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container-page {
+    padding-inline: 1.5rem;
+  }
+
+  .section-title {
+    font-size: 2.25rem;
+  }
+}
+
+.prose-academic p + p {
+  margin-top: 1rem;
+}
+
+@media print {
+  .skip-link,
+  header.sticky,
+  footer,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .program-print-page {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  .program-print-page .card-static,
+  .program-print-page article {
+    break-inside: avoid;
+    box-shadow: none !important;
+    border-color: #ccc !important;
+  }
+
+  a {
+    text-decoration: none !important;
+    color: inherit !important;
+  }
+}
