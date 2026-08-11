@@ -3,5 +3,5 @@
   "framework": "nextjs",
   "regions": ["fra1"],
   "installCommand": "npm install",
-  "buildCommand": "npx prisma generate && npx next build --webpack"
+  "buildCommand": "NEXT_ADAPTER_PATH= npx prisma generate && NEXT_ADAPTER_PATH= npx next build --webpack && node scripts/ensure-nft.js"
 }

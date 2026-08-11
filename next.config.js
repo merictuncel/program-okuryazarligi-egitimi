@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Vercel kendi paketlemesini kullanır. standalone yalnızca self-host (Natro/VPS) için.
-  ...(process.env.VERCEL ? {} : { output: "standalone" }),
-  // Webpack build'te libsql README/LICENSE dosyalarını bundle etmesin
+  // Next 16.3 + output:'standalone' + Vercel adapter = ENOENT next-server.js.nft.json
+  // https://github.com/vercel/next.js/issues/96646
+  // Vercel standalone kullanmaz; self-host için ayrı config kullanın.
   serverExternalPackages: [
     "@libsql/client",
     "@prisma/adapter-libsql",

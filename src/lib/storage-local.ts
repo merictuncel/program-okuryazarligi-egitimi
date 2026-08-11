@@ -1,11 +1,9 @@
 /**
  * Yalnızca lokal / VPS (DATA_DIR) — Vercel üretim paketinde kullanılmaz.
- * storage.ts bunu dinamik import ile çağırır.
  */
 import { mkdir, writeFile, unlink, readFile } from "node:fs/promises";
 import path from "node:path";
-
-export type UploadKind = "instructors" | "documents" | "gallery";
+import type { UploadKind } from "@/lib/storage-types";
 
 const ALLOWED_KINDS = new Set<UploadKind>([
   "instructors",

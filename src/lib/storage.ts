@@ -1,6 +1,7 @@
 import { put, del } from "@vercel/blob";
+import type { UploadKind } from "@/lib/storage-types";
 
-export type UploadKind = "instructors" | "documents" | "gallery";
+export type { UploadKind };
 
 const ALLOWED_KINDS = new Set<UploadKind>([
   "instructors",
@@ -12,7 +13,24 @@ function useBlobStorage() {
   return Boolean(process.env.BLOB_READ_WRITE_TOKEN?.trim());
 }
 
-/** Dosyayı Vercel Blob (üretim) veya yerel diske (yalnızca lokal) yazar */
+async function saveLocal(options: {
+  kind: UploadKind;
+  filename: string;
+  buffer: Buffer;
+  contentType: string;
+}): Promise<string> {
+  const mod = "storage-local";
+  const local = await import(`@/lib/${mod}`);
+  return local.saveUploadBufferLocal(options);
+}
+
+async function deleteLocal(fileUrl: string) {
+  const mod = "storage-local";
+  const local = await import(`@/lib/${mod}`);
+  await local.deleteUploadLocal(fileUrl);
+}
+
+/** Dosyayı Vercel Blob veya (yalnızca lokal) diske yazar */
 export async function saveUploadBuffer(options: {
   kind: UploadKind;
   filename: string;
@@ -39,13 +57,9 @@ export async function saveUploadBuffer(options: {
     );
   }
 
-  const local = await import(
-    /* webpackIgnore: true */ /* turbopackIgnore: true */ "./storage-local"
-  );
-  return local.saveUploadBufferLocal(options);
+  return saveLocal(options);
 }
 
-/** Blob veya yerel dosyayı siler */
 export async function deleteUpload(fileUrl?: string | null) {
   if (!fileUrl) return;
 
@@ -60,25 +74,15 @@ export async function deleteUpload(fileUrl?: string | null) {
 
   if (useBlobStorage() || process.env.VERCEL) return;
 
-  const local = await import(
-    /* webpackIgnore: true */ /* turbopackIgnore: true */ "./storage-local"
-  );
-  await local.deleteUploadLocal(fileUrl);
+  await deleteLocal(fileUrl);
 }
 
-/** Yerel dosya yolu — Vercel/Blob'ta kullanılmaz */
 export function resolveLocalUploadPath(_fileUrl: string): string | null {
   return null;
 }
 
-/** Yerel dosya okuma — yalnızca lokal development API route için */
 export async function readLocalUpload(
-  fileUrl: string,
+  _fileUrl: string,
 ): Promise<{ buffer: Buffer; contentType: string } | null> {
-  if (useBlobStorage() || process.env.VERCEL) return null;
-
-  const local = await import(
-    /* webpackIgnore: true */ /* turbopackIgnore: true */ "./storage-local"
-  );
-  return local.readUploadLocal(fileUrl);
+  return null;
 }
