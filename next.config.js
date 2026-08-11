@@ -1,7 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Vercel kendi paketlemesini kullanır; Natro/cPanel için standalone korunur
-  output: "standalone",
+  // Vercel kendi paketlemesini kullanır. standalone yalnızca self-host (Natro/VPS) için.
+  ...(process.env.VERCEL ? {} : { output: "standalone" }),
+  // Webpack build'te libsql README/LICENSE dosyalarını bundle etmesin
+  serverExternalPackages: [
+    "@libsql/client",
+    "@prisma/adapter-libsql",
+    "libsql",
+  ],
   experimental: {
     serverActions: {
       bodySizeLimit: "12mb",

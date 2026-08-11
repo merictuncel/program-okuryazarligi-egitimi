@@ -1,4 +1,3 @@
-import { mkdir, writeFile, unlink, readFile } from "fs/promises";
 import path from "path";
 import { put, del } from "@vercel/blob";
 
@@ -17,15 +16,9 @@ function useBlobStorage() {
 function localUploadRoot() {
   const dataDir = process.env.DATA_DIR?.trim();
   if (dataDir) {
-    // VPS/kalıcı disk; Turbopack tüm cwd'yi paketlemesin
-    return path.join(/* turbopackIgnore: true */ dataDir, "uploads");
+    return path.join(dataDir, "uploads");
   }
-  // Yerel geliştirme: yalnızca public/uploads
-  return path.join(
-    /* turbopackIgnore: true */ process.cwd(),
-    "public",
-    "uploads",
-  );
+  return path.join(process.cwd(), "public", "uploads");
 }
 
 function localPublicUrl(kind: UploadKind, filename: string) {
@@ -56,9 +49,10 @@ export async function saveUploadBuffer(options: {
     return blob.url;
   }
 
+  const fs = await import("fs/promises");
   const dir = path.join(localUploadRoot(), kind);
-  await mkdir(/* turbopackIgnore: true */ dir, { recursive: true });
-  await writeFile(/* turbopackIgnore: true */ path.join(dir, filename), buffer);
+  await fs.mkdir(dir, { recursive: true });
+  await fs.writeFile(path.join(dir, filename), buffer);
   return localPublicUrl(kind, filename);
 }
 
@@ -75,6 +69,9 @@ export async function deleteUpload(fileUrl?: string | null) {
     return;
   }
 
+  // Vercel Blob kullanılıyorsa yerel silme yok
+  if (useBlobStorage()) return;
+
   const normalized = fileUrl
     .replace(/^\/api\/uploads\//, "/uploads/")
     .replace(/^\/uploads\//, "/uploads/");
@@ -89,15 +86,18 @@ export async function deleteUpload(fileUrl?: string | null) {
   if (!ALLOWED_KINDS.has(subdir as UploadKind)) return;
   if (!filename || filename.includes("..") || filename.includes("\\")) return;
 
+  const fs = await import("fs/promises");
   const full = path.join(localUploadRoot(), subdir, filename);
   try {
-    await unlink(/* turbopackIgnore: true */ full);
+    await fs.unlink(full);
   } catch {
     // ignore
   }
 }
 
 export function resolveLocalUploadPath(fileUrl: string): string | null {
+  if (useBlobStorage()) return null;
+
   const normalized = fileUrl.replace(/^\/api\/uploads\//, "/uploads/");
   if (!normalized.startsWith("/uploads/")) return null;
   const relative = normalized.slice("/uploads/".length);
@@ -115,7 +115,8 @@ export async function readLocalUpload(
   const full = resolveLocalUploadPath(fileUrl);
   if (!full) return null;
   try {
-    const buffer = await readFile(/* turbopackIgnore: true */ full);
+    const fs = await import("fs/promises");
+    const buffer = await fs.readFile(full);
     const ext = path.extname(full).toLowerCase();
     const mime: Record<string, string> = {
       ".jpg": "image/jpeg",
